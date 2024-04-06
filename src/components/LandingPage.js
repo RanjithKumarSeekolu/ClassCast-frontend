@@ -64,7 +64,7 @@ const LandingPage = () => {
               {true && (
                 <button
                   onClick={() => setShowModal(true)}
-                  className="bg-purple-600 text-white font-bold py-2 px-4 rounded mb-4 md:mb-0 md:mr-4"
+                  className="bg-[#7D6EEB] text-white font-bold py-2 px-4 rounded mb-4 md:mb-0 md:mr-4"
                 >
                   + Create Class
                 </button>

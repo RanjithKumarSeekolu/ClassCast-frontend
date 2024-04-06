@@ -19,7 +19,7 @@ const MonacoEditor = () => {
   const [activeTab, setActiveTab] = useState("editor");
 
   const location = useLocation();
-  const { className } = location.state;
+  const { className } = location.state || { className: "Live Classes" };
 
   const queryParams = new URLSearchParams(location.search);
   const classId = queryParams.get("classId");
