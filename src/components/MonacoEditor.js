@@ -6,6 +6,7 @@ import { TbBrandCpp } from "react-icons/tb";
 import { MdOutlineMenu } from "react-icons/md";
 import Tabs from "./Tabs";
 import { baseApiUrl } from "../utils/config";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const userRole = "teacher";
 
@@ -17,7 +18,21 @@ const MonacoEditor = () => {
   const [studentOutput, setStudentOutput] = useState("");
   const [activeTab, setActiveTab] = useState("editor");
 
+  const location = useLocation();
+  const { className } = location.state || { className: "Live Classes" };
+
+  const queryParams = new URLSearchParams(location.search);
+  const classId = queryParams.get("classId");
   const [isNavbarOpen, setIsNavbarOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!classId) {
+      alert("please enter valid classId");
+      navigate("/");
+    }
+  }, [classId]);
 
   useEffect(() => {
     switch (language) {
@@ -70,22 +85,20 @@ int main() {
 
   return (
     <>
-      <div className="text-center bg-purple-300 p-4 w-full">
-        <h1 className="sm:text-6xl text-3xl font-bold sm:pb-4">
-          {language.charAt(0).toUpperCase() + language.slice(1) + " Compiler"}
+      <div className="text-center px-4 py-1 w-full">
+        <button
+          className="absolute top-2 right-3 border border-red-600 px-4 py-1 shadow-md rounded-md text-red-600 hover:bg-red-600 hover:text-white"
+          onClick={() => navigate("/")}
+        >
+          Exit
+        </button>
+        <h1 className="sm:text-6xl text-3xl font-bold text-green-600 ">
+          {className}
         </h1>
-        <p className="sm:block hidden">
-          Our live classes offer students the opportunity to engage in real-time
-          learning sessions led by experienced instructors. Through live
-          interaction, students can actively participate, ask questions, and
-          receive immediate feedback.
-        </p>
-        <span className="relative top-7  bg-purple-500 p-2 rounded-lg">
-          XLIOEIU
-        </span>
+        <span className="absolute top-0 left-0 font-bold p-2">{classId}</span>
       </div>
 
-      <div className="sm:hidden flex justify-center mt-10">
+      <div className="sm:hidden flex justify-center ">
         <div className="flex gap-4 border">
           <button
             className={`p-2 ${activeTab === "editor" ? " bg-gray-200" : ""}`}
@@ -101,7 +114,7 @@ int main() {
           </button>
         </div>
       </div>
-      <div className="flex w-full flex-wrap sm:mt-8 mt-2 p-2">
+      <div className="flex w-full flex-wrap sm:mt-7 mt-2">
         <div
           className={`sm:w-1/2 w-full ${
             activeTab === "editor" ? "block" : "sm:block hidden"
