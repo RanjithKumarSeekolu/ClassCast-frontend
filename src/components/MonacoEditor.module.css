@@ -1,0 +1,28 @@
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px; /* Adjust height as needed */
+  gap: 5px;
+}
+
+.block_loader {
+  display: inline-block;
+  width: 20px; /* Width of each block */
+  height: 20px; /* Height of each block */
+  background-color: #3498db; /* Color of the blocks */
+  margin: 0 5px; /* Margin between blocks */
+  animation: pulse-animation 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-animation {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5); /* Increase the size */
+    opacity: 0.5; /* Decrease the opacity */
+  }
+}
