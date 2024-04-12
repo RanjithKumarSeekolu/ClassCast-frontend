@@ -7,6 +7,7 @@ import { MdOutlineMenu } from "react-icons/md";
 import Tabs from "./Tabs";
 import { baseApiUrl } from "../utils/config";
 import { useLocation, useNavigate } from "react-router-dom";
+import styles from "./MonacoEditor.module.css";
 
 const userRole = "teacher";
 
@@ -17,6 +18,7 @@ const MonacoEditor = () => {
   const [studentCode, setStudentsCode] = useState("");
   const [studentOutput, setStudentOutput] = useState("");
   const [activeTab, setActiveTab] = useState("editor");
+  const [isLoading, setIsLoading] = useState(false);
 
   const location = useLocation();
   const { className } = location.state || { className: "Live Classes" };
@@ -69,17 +71,19 @@ int main() {
 
   const submitCode = async () => {
     try {
+      setIsLoading(true);
       const res = await axios.post(`${baseApiUrl}`, {
         language,
         code,
       });
-      console.log(res);
       if (res.status === 200 && res.data) {
         setActiveTab("output");
         setOutput(res.data.data);
+        setIsLoading(false);
       }
     } catch (err) {
       console.log("fetch error :", err);
+      setIsLoading(false);
     }
   };
 
@@ -87,7 +91,7 @@ int main() {
     <>
       <div className="text-center px-4 py-1 w-full">
         <button
-          className="absolute top-2 right-3 border border-red-600 px-4 py-1 shadow-md rounded-md text-red-600 hover:bg-red-600 hover:text-white"
+          className="absolute top-2 right-3 border border-red-600 px-4 py-1 shadow-md rounded-md text-red-600 hover:bg-red-600 hover:text-white hover:transition"
           onClick={() => navigate("/")}
         >
           Exit
@@ -239,7 +243,19 @@ int main() {
           <div className="border border-l-0 p-2 pb-4 text-gray-400">
             Teacher Output
           </div>
-          <span className="p-2">{output}</span>
+          <span className="p-2">
+            {isLoading ? (
+              <div className={styles.loader}>
+                <div className={styles.block_loader}></div>
+                <div className={styles.block_loader}></div>
+                <div className={styles.block_loader}></div>
+                <div className={styles.block_loader}></div>
+                {/* Add more block-loader divs as needed */}
+              </div>
+            ) : (
+              output
+            )}
+          </span>
         </div>
         {userRole === "student" && (
           <div className={`border min-h-96  sm:w-1/2 sm:block hidden`}>
