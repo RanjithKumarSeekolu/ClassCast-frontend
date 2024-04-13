@@ -8,8 +8,8 @@ import Tabs from "./Tabs";
 import { baseApiUrl } from "../utils/config";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./MonacoEditor.module.css";
-
-const userRole = "teacher";
+import { WebsocketContext } from "../context/SocketContext";
+import { useContext } from "react";
 
 const MonacoEditor = () => {
   const [code, setCode] = useState("");
@@ -19,9 +19,13 @@ const MonacoEditor = () => {
   const [studentOutput, setStudentOutput] = useState("");
   const [activeTab, setActiveTab] = useState("editor");
   const [isLoading, setIsLoading] = useState(false);
+  const [ready, socket] = useContext(WebsocketContext);
 
   const location = useLocation();
-  const { className } = location.state || { className: "Live Classes" };
+  const role = location.state.role || "teacher";
+  const className = location.state.className || "Live Classes";
+
+  console.log(role);
 
   const queryParams = new URLSearchParams(location.search);
   const classId = queryParams.get("classId");
@@ -35,6 +39,34 @@ const MonacoEditor = () => {
       navigate("/");
     }
   }, [classId]);
+
+  useEffect(() => {
+    if (ready && code !== "") {
+      socket.emit("send_code", { room: classId, code });
+    }
+  }, [ready, socket, code]);
+
+  useEffect(() => {
+    if (ready) {
+      socket.on("receive_code", (data) => {
+        setCode(data.code);
+      });
+    }
+  }, [socket, ready]);
+
+  useEffect(() => {
+    if (ready && output !== "") {
+      socket.emit("send_output", { room: classId, output });
+    }
+  }, [ready, socket, output]);
+
+  useEffect(() => {
+    if (ready) {
+      socket.on("receive_output", (data) => {
+        setOutput(data.output);
+      });
+    }
+  }, [socket, ready]);
 
   useEffect(() => {
     switch (language) {
@@ -87,9 +119,15 @@ int main() {
     }
   };
 
+  const editorOptions = {
+    selectOnLineNumbers: true,
+    readOnly: role === "student",
+    minimap: { enabled: true },
+  };
+
   return (
     <>
-      <div className="text-center px-4 py-1 w-full">
+      <div className="text-center px-4 pt-2 pb-5 w-full bg-purple-200">
         <button
           className="absolute top-2 right-3 border border-red-600 px-4 py-1 shadow-md rounded-md text-red-600 hover:bg-red-600 hover:text-white hover:transition"
           onClick={() => navigate("/")}
@@ -118,7 +156,7 @@ int main() {
           </button>
         </div>
       </div>
-      <div className="flex w-full flex-wrap sm:mt-7 mt-2">
+      <div className="flex w-full flex-wrap">
         <div
           className={`sm:w-1/2 w-full ${
             activeTab === "editor" ? "block" : "sm:block hidden"
@@ -158,7 +196,7 @@ int main() {
                     <MdOutlineMenu />
                   </button>
                   <h1 className="text-purple-600 font-bold">
-                    {"Teacher Editor {}"}
+                    {`Teacher Editor {}`}
                   </h1>
                   <button
                     onClick={submitCode}
@@ -172,13 +210,14 @@ int main() {
                   onChange={handleEditorChange}
                   height="90vh"
                   language={language}
+                  options={editorOptions}
                   theme="vs-dark"
                 />
               </div>
             </div>
           </div>
         </div>
-        {userRole === "student" && (
+        {role === "student" && false && (
           <div className={`sm:w-1/2 sm:block hidden`}>
             <div className="flex">
               {/* Side Navbar */}
@@ -257,7 +296,7 @@ int main() {
             )}
           </span>
         </div>
-        {userRole === "student" && (
+        {role === "student" && false && (
           <div className={`border min-h-96  sm:w-1/2 sm:block hidden`}>
             <div className="border border-l-0 p-2 pb-4 text-gray-400">
               Student Output

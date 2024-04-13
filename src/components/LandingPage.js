@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { WebsocketContext } from "../context/SocketContext";
 
 const LandingPage = () => {
   const [className, setClassName] = useState("");
@@ -8,13 +10,19 @@ const LandingPage = () => {
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
   const [classNameError, setClassNameError] = useState(false);
+  const [ready, socket] = useContext(WebsocketContext);
 
   const generateRandomCode = () => {
     return Math.random().toString(36).toUpperCase().substr(2, 8);
   };
 
   const joinRoom = async () => {
-    navigate(`/class?classId=${classId}`);
+    if (classId) {
+      socket.emit("join_room", classId);
+      navigate(`/class?classId=${classId}`, {
+        state: { className, role: "student" },
+      });
+    }
   };
 
   const isFormValid = () => {
@@ -32,7 +40,10 @@ const LandingPage = () => {
       const newClassId = await generateRandomCode();
       setClassId(newClassId);
       setShowModal(false);
-      navigate(`/class?classId=${newClassId}`, { state: { className } });
+      socket.emit("join_room", newClassId);
+      navigate(`/class?classId=${newClassId}`, {
+        state: { className, role: "teacher" },
+      });
     } catch (error) {
       console.error("Failed to join the class:", error);
     }
